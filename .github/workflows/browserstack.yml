@@ -1,0 +1,49 @@
+name: BrowserStack Tests
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Target environment'
+        required: true
+        default: 'qa'
+        type: choice
+        options: [dev, qa, preprod, prod]
+  schedule:
+    # Every Monday at 06:00 UTC
+    - cron: '0 6 * * 1'
+
+jobs:
+  browserstack:
+    name: 'BrowserStack Cross-Browser Run'
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run tests on BrowserStack
+        run: npx playwright test
+        env:
+          USE_BROWSERSTACK: 'true'
+          BROWSERSTACK_USERNAME: ${{ secrets.BROWSERSTACK_USERNAME }}
+          BROWSERSTACK_ACCESS_KEY: ${{ secrets.BROWSERSTACK_ACCESS_KEY }}
+          BS_PROJECT_NAME: 'MB QA Automation'
+          BS_BUILD_NAME: 'CI Run ${{ github.run_id }}'
+          ENV: ${{ github.event.inputs.environment || 'qa' }}
+          CI: 'true'
+
+      - name: Upload HTML report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: browserstack-playwright-report
+          path: playwright-report/
+          retention-days: 14

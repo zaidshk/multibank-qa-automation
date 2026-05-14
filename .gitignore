@@ -1,0 +1,16 @@
+node_modules/
+dist/
+playwright-report/
+blob-report/
+test-results/
+.env
+*.local
+
+# Internal
+.claude/
+CLAUDE.md
+docs/
+
+# OS
+.DS_Store
+Thumbs.db
