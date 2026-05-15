@@ -26,15 +26,17 @@ const standardProjects = [
   },
 
   // ── Mobile viewports ──────────────────────────────────────────────────────
-  // Validates responsive layout and touch-friendly navigation on trade.mb.io.
+  // Scoped to edge-cases.spec.ts only — these projects run the viewport regression
+  // test natively at device size. Desktop specs are excluded because they assume
+  // desktop layout (full nav, wide tables) and would produce meaningless failures on mobile.
   {
     name: 'mobile-chrome',
-    testIgnore: ['**/visual/**'],
+    testMatch: ['**/tests/edge-cases.spec.ts'],
     use: { ...devices['Pixel 5'] },
   },
   {
     name: 'mobile-safari',
-    testIgnore: ['**/visual/**'],
+    testMatch: ['**/tests/edge-cases.spec.ts'],
     use: { ...devices['iPhone 13'] },
   },
 
@@ -53,12 +55,11 @@ export default defineConfig({
   retries: isCI ? 1 : 0,
   workers: isCI ? 4 : undefined,
 
-  // HTML report is always emitted to playwright-report/ regardless of environment.
-  // list reporter streams test names in CI; dot is compact for local runs.
-  reporter: [
-    ['html', { outputFolder: 'playwright-report', open: 'never' }],
-    isCI ? ['list'] : ['dot'],
-  ],
+  // In CI the blob reporter feeds the merge-reports job that produces the final HTML.
+  // Locally we emit HTML directly since there's no merge step.
+  reporter: isCI
+    ? [['blob'], ['list']]
+    : [['html', { outputFolder: 'playwright-report', open: 'never' }], ['dot']],
 
   use: {
     baseURL: envConfig.baseURL,

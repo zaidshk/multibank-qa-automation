@@ -1,12 +1,18 @@
 import { test as base } from '@playwright/test';
 import { HomePage } from '../pages/HomePage';
 import { NavigationBar } from '../pages/NavigationBar';
-import { TradingPairsSection } from '../pages/TradingPairsSection';
+import { ExplorePage } from '../pages/ExplorePage';
+import { CompanyPage } from '../pages/CompanyPage';
+import { Footer } from '../pages/Footer';
+import { PricePage } from '../pages/PricePage';
 
 type PageFixtures = {
   homePage: HomePage;
   navigationBar: NavigationBar;
-  tradingPairsSection: TradingPairsSection;
+  explorePage: ExplorePage;
+  companyPage: CompanyPage;
+  footer: Footer;
+  pricePage: PricePage;
 };
 
 export const test = base.extend<PageFixtures>({
@@ -16,8 +22,17 @@ export const test = base.extend<PageFixtures>({
   navigationBar: async ({ page }, use) => {
     await use(new NavigationBar(page));
   },
-  tradingPairsSection: async ({ page }, use) => {
-    await use(new TradingPairsSection(page));
+  explorePage: async ({ page }, use) => {
+    await use(new ExplorePage(page));
+  },
+  companyPage: async ({ page }, use) => {
+    await use(new CompanyPage(page));
+  },
+  footer: async ({ page }, use) => {
+    await use(new Footer(page));
+  },
+  pricePage: async ({ page }, use) => {
+    await use(new PricePage(page));
   },
 });
 

@@ -6,10 +6,15 @@ test-results/
 .env
 *.local
 
-# Internal
+# Tool / IDE configs
 .claude/
+.cursor/
+.vscode/settings.json
 CLAUDE.md
-docs/
+
+# Local working docs (keep test-plan committed for reviewers)
+docs/*
+!docs/test-plan.md
 
 # OS
 .DS_Store

@@ -2,29 +2,32 @@ import { Page, Locator } from '@playwright/test';
 import { BasePage } from './base/BasePage';
 
 export class HomePage extends BasePage {
-  // Hero section
-  readonly heroSection: Locator;
-  readonly heroPrimaryHeading: Locator;
-  readonly heroCtaButton: Locator;
+  // ── Hero section ─────────────────────────────────────────────────────────
+  readonly heroHeading: Locator;
+  readonly heroSubtext: Locator;
 
-  // App store links
-  readonly appStoreLink: Locator;
-  readonly googlePlayLink: Locator;
+  // ── Primary CTAs ─────────────────────────────────────────────────────────
+  readonly downloadAppCta: Locator;
+  readonly openAccountCta: Locator;
 
   constructor(page: Page) {
     super(page);
 
-    this.heroSection = page.getByRole('banner');
-    this.heroPrimaryHeading = page.getByRole('heading', { level: 1 });
-    // NOTE: Recommend data-testid="banner-hero-cta" once dev team adopts testid strategy
-    this.heroCtaButton = page.getByRole('link', { name: /start trading|get started|open account/i });
+    this.heroHeading = page.getByRole('heading', { name: /crypto for everyone/i });
+    this.heroSubtext = page.getByText(/simple, secure and speedy/i);
 
-    // NOTE: Recommend data-testid="link-app-store-ios" / "link-app-store-android"
-    this.appStoreLink = page.getByRole('link', { name: /app store/i });
-    this.googlePlayLink = page.getByRole('link', { name: /google play/i });
+    // "Download the app" renders as a link on some pages and a button on others
+    this.downloadAppCta = page
+      .getByRole('link', { name: /download the app/i })
+      .or(page.getByRole('button', { name: /download the app/i }))
+      .first();
+
+    this.openAccountCta = page
+      .getByRole('link', { name: /open an account/i })
+      .or(page.getByRole('button', { name: /open an account/i }));
   }
 
   async goto(): Promise<void> {
-    await super.goto('/');
+    await super.goto('/en');
   }
 }
