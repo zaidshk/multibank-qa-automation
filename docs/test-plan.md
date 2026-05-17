@@ -71,7 +71,7 @@ Main heading, five section headings, five key stats ($2T turnover, 2M+ customers
 ### 4. Edge Cases
 
 **EDGE-01 — Locale URLs route correctly**  
-`/ar/explore` and `/ru/explore` are navigated directly. The `/ar-AE/` and `/ru-AE/` redirect is geo-IP based — it fires from UAE IPs but not from CI data centre IPs. The URL assertion is soft so CI does not block on the redirect; the hard assertion is that both pages render a visible h1 regardless of whether the redirect occurred.
+`/ar/explore` and `/ru/explore` are navigated directly. The `/ar-AE/` redirect is geo-IP based — it fires from UAE IPs but GitHub Actions runs from US data centres where the redirect does not trigger. The URL assertion uses a regex that accepts both forms (`/ar/` or `/ar-AE/`, `/ru/` or `/ru-AE/`) so CI passes regardless of IP location. The hard assertion in both tests is that the page renders a visible h1. Full redirect validation requires a self-hosted runner on UAE infrastructure.
 
 **EDGE-02 — No asset in both Gainers and Losers simultaneously** *(skipped — pending product clarification)*  
 Collects symbols from both tabs and asserts no overlap. Skipped because the observed behaviour — same assets appearing in both tabs during a bull market — may be by design: "Losers" could rank relative underperformers rather than strictly negative movers, which is a valid product decision for a trading app. The assertion is written and ready; remove `test.skip` once the intended tab classification is confirmed by the product owner.

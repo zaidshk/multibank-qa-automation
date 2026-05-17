@@ -11,13 +11,13 @@ test.describe('EDGE-01 — Locale-specific URLs render content in the correct la
   test('navigating to the Arabic locale renders the explore page in Arabic', { tag: '@sanity' }, async ({ page }) => {
     await page.goto('/ar/explore');
 
-    // The /ar-AE/ redirect is geo-IP based — it fires from UAE IPs but not from
-    // CI data centre IPs (US/EU). Soft-assert so CI doesn't block on the redirect;
-    // the h1 check below is the real functional assertion.
-    await expect.soft(
+    // The /ar-AE/ redirect is geo-IP based — fires from UAE IPs, stays as /ar/
+    // from CI data centre IPs (US/EU). Both are valid; the regex accepts either.
+    // The h1 check is the real functional assertion — the page renders Arabic content.
+    await expect(
       page,
-      'Arabic locale URL should resolve to the /ar-AE/ region variant (geo-IP dependent — may not redirect outside UAE)',
-    ).toHaveURL(/\/ar-AE\/explore/);
+      'Arabic locale URL should remain on the Arabic explore path',
+    ).toHaveURL(/\/(ar|ar-AE)\/explore/);
 
     await expect(
       page.locator('h1').first(),
@@ -28,11 +28,11 @@ test.describe('EDGE-01 — Locale-specific URLs render content in the correct la
   test('navigating to the Russian locale renders the explore page in Russian', { tag: '@sanity' }, async ({ page }) => {
     await page.goto('/ru/explore');
 
-    // Same geo-IP note as above — soft assertion for CI compatibility.
-    await expect.soft(
+    // Same geo-IP note — accepts /ru/ or /ru-AE/ depending on IP location.
+    await expect(
       page,
-      'Russian locale URL should resolve to the /ru-AE/ region variant (geo-IP dependent — may not redirect outside UAE)',
-    ).toHaveURL(/\/ru-AE\/explore/);
+      'Russian locale URL should remain on the Russian explore path',
+    ).toHaveURL(/\/(ru|ru-AE)\/explore/);
 
     await expect(
       page.locator('h1').first(),
