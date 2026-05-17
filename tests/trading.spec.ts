@@ -8,6 +8,9 @@ test.describe('Trading Functionality', () => {
 
     test('explore page shows the market heading, all three tabs, sentiment widget, and download CTA', { tag: ['@smoke', '@sanity'] }, async ({ explorePage }) => {
       await explorePage.goto();
+      // Wait for the market data section to render before asserting tabs —
+      // the heading is static HTML but tabs are JS-rendered and load later.
+      await explorePage.waitForTableLoad();
 
       await expect(
         explorePage.pageHeading,
