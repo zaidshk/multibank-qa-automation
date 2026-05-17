@@ -248,3 +248,35 @@ mb-qa-automation/
 2. Define all locators as `readonly` properties in the constructor.
 3. Add an instance to `fixtures/pages.fixture.ts`.
 4. Import `{ test, expect }` from `fixtures/pages.fixture.ts` in your spec.
+
+---
+
+## Framework Decisions and Assumptions
+
+**Why Playwright?**
+Playwright runs tests on Chromium, Firefox, and WebKit from a single setup. That matters here because Safari is a real browser for trading platform users and most tools do not support it properly. It also handles network interception out of the box, which I needed for the API and network tests. Cypress does not support WebKit and Selenium needs a lot more setup for the same outcome.
+
+**Why Page Object Model?**
+When a selector changes on the site, I fix it in one place and every test that uses it is sorted. Without POM, one UI change can break tests across multiple files and tracking them all down takes time. For anything meant to grow and be maintained, POM is the obvious choice.
+
+**Why getByRole for locators?**
+Role-based locators work against what an element actually is, not what it looks like in the DOM. They also catch accessibility problems as a side effect. If a role locator cannot find something, there is a good chance that element has an accessibility issue too.
+
+**Scope: public pages only**
+Every test runs against pages you can reach without logging in. Authenticated flows like trading, portfolio, and wallet are out of scope. No real credentials, no real orders, no personal data is used anywhere in the suite.
+
+**Live market data**
+Prices change every second so tests check structure and format rather than exact values. The Gainers tab test checks that each row shows a valid percentage, not that a specific coin moved by a specific amount. This keeps the suite stable regardless of what the market is doing.
+
+**EDGE-02 skipped**
+During exploratory testing I noticed the same assets showing up in both Gainers and Losers at the same time. This might be intentional, where Losers shows the smallest gainers rather than strictly negative movers. The test is written and ready, it is just skipped until the product team confirms what the expected behaviour actually is.
+
+**Mobile projects in the config**
+The config includes mobile-chrome and mobile-safari to show the framework supports responsive testing. No separate mobile specs are written because the scope is the desktop web surface. The mobile projects run the edge-cases file at device dimensions to cover viewport regression.
+
+**Visual tests run locally only**
+Visual snapshot tests are not in CI because the baseline images are created on macOS and Linux renders fonts slightly differently, which causes false failures. They work fine locally. If visual regression in CI is needed later, Playwright supports per-platform snapshot folders through a single config option with no test code changes required.
+
+**HTML report included for reviewers**
+The Playwright HTML report is committed to this repo so anyone who clones it can open the latest test results straight away without running anything. Use `npm run report` to open it. Running the tests locally will overwrite it with a fresh report.
+

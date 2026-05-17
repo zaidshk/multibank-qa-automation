@@ -1,6 +1,6 @@
 node_modules/
 dist/
-playwright-report/
+#playwright-report/
 blob-report/
 test-results/
 .env
@@ -12,9 +12,11 @@ test-results/
 .vscode/settings.json
 CLAUDE.md
 
-# Local working docs (keep test-plan committed for reviewers)
+# Local working docs
 docs/*
 !docs/test-plan.md
+!docs/release-readiness-checklist.md
+!docs/risk-matrix.md
 
 # OS
 .DS_Store
