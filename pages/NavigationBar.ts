@@ -11,6 +11,21 @@ export class NavigationBar extends BasePage {
       .or(page.getByRole('navigation').first());
   }
 
+  // ── Mobile hamburger & overlay ───────────────────────────────────────────────
+
+  // Visible only at mobile widths (≤ ~768px). Uses aria-label="Open menu" which is
+  // stable and accessible — unlike the language switcher which has no aria-label (R-02).
+  get hamburgerButton(): Locator {
+    return this.page.getByRole('button', { name: /open menu/i });
+  }
+
+  // The mobile menu renders in a Radix UI dialog portal — a separate <nav> element
+  // outside the header's <nav>, so existing nav-scoped link locators return 0 matches.
+  // Scope mobile assertions to this locator after calling openMobileMenu().
+  get mobileMenu(): Locator {
+    return this.page.getByRole('dialog').getByRole('navigation');
+  }
+
   // ── Nav item locators (scoped to nav to avoid footer link conflicts) ────────
 
   get logoLink(): Locator {
@@ -68,6 +83,11 @@ export class NavigationBar extends BasePage {
 
   async isVisible(): Promise<boolean> {
     return this.nav.isVisible();
+  }
+
+  async openMobileMenu(): Promise<void> {
+    await this.hamburgerButton.click();
+    await this.mobileMenu.waitFor({ state: 'visible' });
   }
 
   async clickExplore(): Promise<void> {

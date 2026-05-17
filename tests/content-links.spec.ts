@@ -44,7 +44,7 @@ test.describe('Content & Links', () => {
 
   // ── CONTENT-02 ────────────────────────────────────────────────────────────────
 
-  test.describe('CONTENT-02 — App download CTA resolves to the Apple App Store', () => {
+  test.describe('CONTENT-02 — App download CTA resolves to an official app store', () => {
 
     test('explore page "Download the app" CTA is visible and is a link with a non-empty href', { tag: '@sanity' }, async ({ explorePage }) => {
       await explorePage.goto();
@@ -67,20 +67,42 @@ test.describe('Content & Links', () => {
       const href = await explorePage.downloadAppCta.getAttribute('href');
       expect(href, '"Download the app" href must not be empty').toBeTruthy();
 
-      // Navigate to the smart link and follow its redirect chain.
-      // Using 'commit' so we capture the final URL without waiting for the full store
-      // page to render (App Store / Play Store pages load third-party scripts out of scope).
-      await page.goto(href!, { waitUntil: 'commit' });
+      // Smart links are device-aware — use an iOS UA so Apple's CDN routes to the
+      // App Store rather than the web fallback.
+      // We walk the redirect chain one hop at a time (maxRedirects: 0) so we can
+      // inspect each Location header without the HTTP client ever attempting to
+      // open a custom URI scheme (itms-appss://) which would throw on any platform.
+      const iosSafariUA =
+        'Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) ' +
+        'AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Mobile/15E148 Safari/604.1';
 
-      // The smart link is device-aware and routes to either store depending on the
-      // browser's user agent — both destinations are valid and correct behaviour.
-      const finalUrl = page.url();
-      const landsOnStore =
-        /apps\.apple\.com/.test(finalUrl) || /play\.google\.com/.test(finalUrl);
+      let nextUrl: string = href!;
+      let landedOnStore = false;
+
+      for (let hop = 0; hop < 10 && !landedOnStore; hop++) {
+        const response = await page.request.get(nextUrl, {
+          headers: { 'User-Agent': iosSafariUA },
+          maxRedirects: 0,
+          failOnStatusCode: false,
+        });
+
+        const location = response.headers()['location'] ?? '';
+        const urlToCheck = location || response.url();
+
+        if (/apps\.apple\.com/.test(urlToCheck) || /play\.google\.com/.test(urlToCheck)) {
+          landedOnStore = true;
+          break;
+        }
+
+        // Stop when there is no further redirect, or the next hop is a non-HTTPS
+        // scheme (e.g. itms-appss://) that confirms we have reached the App Store.
+        if (!location || !location.startsWith('https')) break;
+        nextUrl = location;
+      }
 
       expect(
-        landsOnStore,
-        `App download link should redirect to Apple App Store or Google Play, got: ${finalUrl}`,
+        landedOnStore,
+        `App download link should redirect to Apple App Store or Google Play when requested with an iOS UA`,
       ).toBe(true);
     });
 

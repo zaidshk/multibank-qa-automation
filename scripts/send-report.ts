@@ -1,20 +1,32 @@
 import * as nodemailer from 'nodemailer';
 import * as fs from 'fs';
 import * as path from 'path';
-import { requireEnv, optionalEnv } from '../helpers/env';
+import { optionalEnv } from '../helpers/env';
 
 async function sendReport(): Promise<void> {
   // Invoked with "failed" argument only when tests have actually failed in CI.
   const hasFailed = process.argv[2] === 'failed';
   if (!hasFailed) return;
 
+  // Skip silently when SMTP secrets are not configured (e.g. forks, open PRs).
+  // This prevents the CI job from failing just because email isn't wired up.
+  const smtpHost = process.env['SMTP_HOST'];
+  const smtpUser = process.env['SMTP_USER'];
+  const smtpPass = process.env['SMTP_PASSWORD'];
+  const emailTo  = process.env['REPORT_EMAIL_TO'];
+
+  if (!smtpHost || !smtpUser || !smtpPass || !emailTo) {
+    console.log('SMTP credentials not configured — skipping failure email.');
+    return;
+  }
+
   const transporter = nodemailer.createTransport({
-    host: requireEnv('SMTP_HOST'),
+    host: smtpHost,
     port: parseInt(optionalEnv('SMTP_PORT', '587'), 10),
     secure: process.env['SMTP_SECURE'] === 'true',
     auth: {
-      user: requireEnv('SMTP_USER'),
-      pass: requireEnv('SMTP_PASSWORD'),
+      user: smtpUser,
+      pass: smtpPass,
     },
   });
 
@@ -27,8 +39,8 @@ async function sendReport(): Promise<void> {
     ? `${process.env['GITHUB_SERVER_URL']}/${process.env['GITHUB_REPOSITORY']}/actions/runs/${process.env['GITHUB_RUN_ID']}`
     : 'local run';
 
-  const recipients = requireEnv('REPORT_EMAIL_TO');
-  const sender = requireEnv('SMTP_USER');
+  const recipients = emailTo;
+  const sender = smtpUser;
   const timestamp = new Date().toUTCString();
 
   await transporter.sendMail({

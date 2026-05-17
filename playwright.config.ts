@@ -59,7 +59,7 @@ export default defineConfig({
   // Locally we emit HTML directly since there's no merge step.
   reporter: isCI
     ? [['blob'], ['list']]
-    : [['html', { outputFolder: 'playwright-report', open: 'never' }], ['dot']],
+    : [['html', { outputFolder: 'playwright-report', open: 'always' }], ['dot']],
 
   use: {
     baseURL: envConfig.baseURL,

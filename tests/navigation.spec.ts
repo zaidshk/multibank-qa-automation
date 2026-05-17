@@ -48,7 +48,7 @@ test.describe('Navigation & Layout', () => {
 
     test('"$MBG" link points to the MultiBank token site', { tag: '@sanity' }, async ({ page, navigationBar }) => {
       await page.goto('/en');
-      // External link — validate the href rather than following it out of domain
+      // href presence only — HTTP 200 validation for the live external URL is in EDGE-04
       await expect(navigationBar.mbgLink).toHaveAttribute('href', /token\.multibankgroup\.com/);
     });
 

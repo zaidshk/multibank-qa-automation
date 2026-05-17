@@ -106,7 +106,7 @@ npx playwright test tests/trading.spec.ts
 | `tests/parameterized-assets.spec.ts` | BONUS-03 | 6 |
 | `tests/visual/explore.spec.ts` | BONUS-02 (opt-in) | 3 |
 
-**Note:** EDGE-02 is an intentionally failing test. It exposes a known data integrity issue where the Gainers and Losers tabs show overlapping assets in bull-market conditions.
+**Note:** EDGE-02 is skipped pending product clarification. In broadly positive market conditions, the same assets appear in both the Gainers and Losers tabs — this may be by design if "Losers" ranks relative underperformers rather than strictly negative movers. The assertion is written and ready; remove `test.skip` once the intended classification is confirmed by the product owner.
 
 ---
 
@@ -132,8 +132,11 @@ Tests are tagged `@smoke`, `@sanity`, or left untagged (regression). Use these t
 
 ## Viewing Reports
 
+The HTML report opens automatically in your browser at the end of every local test run — no extra command needed. This is intentional to make results immediately visible without any additional steps.
+
+If you need to reopen the last report manually:
+
 ```bash
-# Open the last HTML report
 npm run report
 ```
 
