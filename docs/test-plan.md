@@ -48,7 +48,7 @@ Checks that all nav items remain visible (not collapsed) and the page has no hor
 Checks the main heading, three market tabs (Hot / Gainers / Losers), the Fear & Greed sentiment widget, and the Download CTA are all visible on the explore page.
 
 **TRADE-02 — Tab grouping works correctly**  
-Hot tab shows populated rows. Gainers tab shows positive numeric change values. Losers tab shows well-formed percentage values (direction is colour-coded, not sign-prefixed). Gainers and Losers return different lists.
+Hot tab shows populated rows. Gainers tab shows non-negative numeric change values (≥ 0 — a flat market can produce 0.00% gainers that still rank above the rest of the list). Losers tab shows well-formed percentage values (direction is colour-coded, not sign-prefixed). Gainers and Losers return different lists.
 
 **TRADE-03 — Asset rows contain the required data fields**  
 First row on the Hot tab has at least 3 cells and a visible USD price element.
@@ -71,7 +71,7 @@ Main heading, five section headings, five key stats ($2T turnover, 2M+ customers
 ### 4. Edge Cases
 
 **EDGE-01 — Locale URLs route correctly**  
-`/ar/explore` redirects to `/ar-AE/explore`. `/ru/explore` redirects to `/ru-AE/explore`. Both render a visible h1.
+`/ar/explore` and `/ru/explore` are navigated directly. The `/ar-AE/` and `/ru-AE/` redirect is geo-IP based — it fires from UAE IPs but not from CI data centre IPs. The URL assertion is soft so CI does not block on the redirect; the hard assertion is that both pages render a visible h1 regardless of whether the redirect occurred.
 
 **EDGE-02 — No asset in both Gainers and Losers simultaneously** *(skipped — pending product clarification)*  
 Collects symbols from both tabs and asserts no overlap. Skipped because the observed behaviour — same assets appearing in both tabs during a bull market — may be by design: "Losers" could rank relative underperformers rather than strictly negative movers, which is a valid product decision for a trading app. The assertion is written and ready; remove `test.skip` once the intended tab classification is confirmed by the product owner.
@@ -92,8 +92,8 @@ Runs on desktop browsers at forced 375px width, and natively on the `mobile-chro
 **BONUS-01 — Network and API behaviour**  
 Four tests: no first-party requests fail on load; at least one fetch/XHR call is made; route interception passthrough doesn't break the page; failing all network calls doesn't produce uncaught JS errors.
 
-**BONUS-02 — Visual regression snapshots** *(opt-in, `npm run test:visual`)*  
-Captures the promotional banner strip, tab bar, and heading region. Live price cells are masked. Run `--update-snapshots` to set the baseline.
+**BONUS-02 — Visual regression snapshots** *(opt-in, local only — `npm run test:visual`)*  
+Captures the promotional banner strip, tab bar, and heading region. Live price cells are masked. Run `--update-snapshots` to set the baseline. Excluded from CI because snapshots are committed from macOS and Linux renders fonts differently, causing false pixel diffs. If CI visual regression is needed in future, the `snapshotPathTemplate` config option supports per-platform baseline folders (`darwin/` and `linux/`) so each environment compares against its own snapshots — no test code changes required.
 
 **BONUS-03 — Parameterized asset price pages**  
 Six assets tested via `for...of` loop (BTC, ETH, SOL, XRP, DOGE, MBG). Each checks the coin name is visible and the price heading matches a numeric format.

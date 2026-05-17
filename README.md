@@ -72,10 +72,12 @@ npm run test:smoke
 npm run test:sanity
 ```
 
-### Visual regression tests (opt-in)
+### Visual regression tests (opt-in, local only)
 ```bash
 npm run test:visual
 ```
+
+Visual tests run locally only — they are excluded from CI because the baseline snapshots are committed from macOS and Linux renders fonts differently, producing false pixel diffs. If CI visual regression is needed later, Playwright's `snapshotPathTemplate` supports per-platform baseline folders with no test code changes required.
 
 ### Update visual snapshots
 ```bash

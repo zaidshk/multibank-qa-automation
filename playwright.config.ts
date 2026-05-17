@@ -40,12 +40,14 @@ const standardProjects = [
     use: { ...devices['iPhone 13'] },
   },
 
-  // ── Visual regression (opt-in, never included in the default run) ─────────
-  {
+  // ── Visual regression (opt-in, local only) ───────────────────────────────
+  // Excluded from CI — snapshots are generated on macOS and pixel rendering
+  // differs on Linux, causing false failures. Run locally with: npm run test:visual
+  ...(!isCI ? [{
     name: 'visual',
     testMatch: ['**/tests/visual/**/*.spec.ts'],
     use: { ...devices['Desktop Chrome'] },
-  },
+  }] : []),
 ];
 
 export default defineConfig({

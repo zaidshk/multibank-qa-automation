@@ -62,7 +62,9 @@ test.describe('Trading Functionality', () => {
         await expect.soft(indicator, `Row ${i + 1} change value should be visible`).toBeVisible();
         const changeText = (await indicator.textContent()) ?? '';
         const numericChange = parseFloat(changeText.replace('%', '').trim());
-        expect.soft(numericChange, `Row ${i + 1} on Gainers should have a positive change value`).toBeGreaterThan(0);
+        // >= 0 rather than > 0 — in a flat market an asset can show 0.00% and still
+        // rank as a top gainer relative to the rest of the list.
+        expect.soft(numericChange, `Row ${i + 1} on Gainers should have a non-negative change value`).toBeGreaterThanOrEqual(0);
       }
     });
 
