@@ -41,6 +41,10 @@ test.describe('Navigation & Layout', () => {
     for (const { label, urlPattern } of clickableItems) {
       test(`"${label}" navigates to the expected URL`, { tag: '@sanity' }, async ({ page, navigationBar }) => {
         await page.goto('/en');
+        // Wait for the Next.js router to hydrate before clicking. The home page has
+        // live market data polling that prevents networkidle from ever firing, so we
+        // cap the wait at 5 s and proceed regardless — enough time for hydration.
+        await page.waitForLoadState('networkidle', { timeout: 5000 }).catch(() => {});
         await navigationBar.nav.getByRole('link', { name: label }).click();
         await expect(page).toHaveURL(urlPattern);
       });
